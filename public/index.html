@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>gronka status</title>
+    <meta name="description" content="Live status of the gronka Discord bot, web.gronka.dev and every download source." />
+    <link rel="icon" href="https://web.gronka.dev/favicon.svg" />
+    <link rel="stylesheet" href="status.css" />
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute">
+      <filter id="ink" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="4" result="n" />
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
+
+    <header class="top">
+      <a class="brand" href="https://gronka.dev"><span class="g">g</span>gronka<sup>™</sup></a>
+      <span class="sub">status</span>
+    </header>
+
+    <main>
+      <section class="hero">
+        <img class="peng" id="peng" src="p/happy.svg" alt="" />
+        <div>
+          <h1 id="headline">checking...</h1>
+          <p class="lede" id="lede"></p>
+        </div>
+      </section>
+
+      <div id="active"></div>
+      <div id="groups"></div>
+
+      <section class="group past">
+        <h2>past incidents</h2>
+        <div id="past"><p class="none">nothing in the last 30 days.</p></div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <a href="https://gronka.dev">gronka.dev</a><a href="https://web.gronka.dev">web</a
+      ><a href="https://github.com/gronkanium/gronka">github</a><a href="/api/status">json</a>
+      <span class="tm">gronka™ © 2025-2026 gronkanium</span>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
