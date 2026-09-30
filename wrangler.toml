@@ -17,4 +17,4 @@ enabled = false
 [[d1_databases]]
 binding = "DB"
 database_name = "gronka-status"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "ccf2cbfd-9762-46cd-9770-e61591b36713"
