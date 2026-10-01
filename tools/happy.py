@@ -1,9 +1,10 @@
 # The status page's all-clear penguin: idle's body with happy arched eyes and a grin, drawn by the
-# mascot's own code so it matches every other pose. `python3 tools/happy.py`
+# mascot's own code so it matches every other pose. `MASCOT_DIR=<mascot project> python3 tools/happy.py`
+import os
 import sys
 from pathlib import Path
 
-MASCOT = Path.home() / 'gronka-promos/projects/mascot'
+MASCOT = Path(os.environ['MASCOT_DIR'])
 sys.path.insert(0, str(MASCOT))
 import web  # noqa: E402
 

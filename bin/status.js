@@ -4,7 +4,7 @@
 import { parseArgs } from 'node:util';
 
 const STATUS_URL = process.env.STATUS_URL || 'https://status.gronka.dev';
-const SESSIONS_URL = process.env.SESSIONS_URL || 'http://127.0.0.1:8090/api/state';
+const SESSIONS_URL = process.env.SESSIONS_URL;
 const WORKERS_EXPECTED = Number(process.env.WORKERS_EXPECTED || 2);
 const WINDOW_HOURS = 3;
 
@@ -99,6 +99,7 @@ async function sources() {
 }
 
 async function sessions() {
+  if (!SESSIONS_URL) return [];
   try {
     const r = await fetch(SESSIONS_URL, { signal: AbortSignal.timeout(5000) });
     const { sessions: list } = await r.json();

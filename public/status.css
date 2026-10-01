@@ -235,7 +235,7 @@ h1 {
   box-shadow: inset 0 0 0 1.5px var(--pencil);
 }
 
-/* no ink filter here: it bends the bars (see gronka-promos BRAND.md) */
+/* no ink filter here: it is for drawings, never data, and bends the bars */
 .bars {
   grid-column: 1 / -1;
   display: flex;
