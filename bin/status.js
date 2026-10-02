@@ -107,8 +107,19 @@ async function sessions() {
       id: `session-${s.id}`,
       group: 'sessions',
       label: `${s.name.toLowerCase()} session`,
-      state: s.status === 'alive' ? 'ok' : s.backoff || s.status === 'failed' ? 'down' : 'degraded',
-      detail: s.lastCheck ? `checked ${Math.round((Date.now() - s.lastCheck) / 60000)} min ago` : 'never checked',
+      // 'running' is a routine login check in progress, not a problem.
+      state:
+        s.status === 'alive' || s.status === 'running'
+          ? 'ok'
+          : s.backoff || s.status === 'failing' || s.status === 'backing off'
+            ? 'down'
+            : 'unknown',
+      detail:
+        s.status === 'running'
+          ? 'checking now'
+          : s.lastCheck
+            ? `checked ${Math.round((Date.now() - s.lastCheck) / 60000)} min ago`
+            : 'never checked',
     }));
   } catch {
     return [

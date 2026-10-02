@@ -12,6 +12,16 @@ const GROUPS = [
   ['sources', 'sources', 'success rate of real requests'],
 ];
 const WORD = { ok: 'working', degraded: 'slow', down: 'failing', unknown: 'no data', idle: 'quiet' };
+// "degraded" means something different per component: a slow answer, a bot starting up, some
+// workers offline, or a site where some downloads fail.
+const DEGRADED = {
+  bot: ['starting', 'it should be back in a moment.'],
+  workers: ['partly offline', 'downloads still run, with fewer workers.'],
+  sources: ['having trouble', 'some downloads from it are failing right now.'],
+  probe: ['slow', 'working, just not at full speed.'],
+};
+const degraded = c => DEGRADED[c.id] ?? DEGRADED[c.group] ?? DEGRADED.probe;
+const word = c => (c.state === 'degraded' ? degraded(c)[0] : (WORD[c.state] ?? c.state));
 const DAYS = 90;
 
 const $ = id => document.getElementById(id);
@@ -51,7 +61,7 @@ function row(c, days) {
   const extra = [note, c.detail, c.ms ? `${c.ms} ms` : ''].filter(Boolean).join(' · ');
   return `<li>
     <div class="svc"><b>${esc(name)}</b><span>${esc(extra)}</span></div>
-    <div class="state ${c.state}">${WORD[c.state] ?? c.state}</div>
+    <div class="state ${c.state}">${word(c)}</div>
     <div class="bars">${h.cells}</div>
     <div class="up">${h.uptime ? `${h.uptime}% working · last ${DAYS} days` : 'history starts today'}</div>
   </li>`;
@@ -94,8 +104,8 @@ function hero(s, comps, open) {
     lede = `everything else ${down.length === comps.length ? 'too' : 'works'}.`;
   } else if (slow.length) {
     pose = 'slow';
-    head = `${name(slow[0])} is slow.`;
-    lede = 'working, just not at full speed.';
+    head = `${name(slow[0])} ${slow[0].id === 'workers' ? 'are' : 'is'} ${degraded(slow[0])[0]}.`;
+    lede = degraded(slow[0])[1];
   }
   $('peng').src = `p/${pose}.svg`;
   $('headline').textContent = head;
