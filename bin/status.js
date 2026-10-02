@@ -7,6 +7,7 @@ const STATUS_URL = process.env.STATUS_URL || 'https://status.gronka.dev';
 const SESSIONS_URL = process.env.SESSIONS_URL;
 const WORKERS_EXPECTED = Number(process.env.WORKERS_EXPECTED || 2);
 const WINDOW_HOURS = 3;
+const FAILURES_DEGRADED = 5;
 
 const SOURCES = {
   youtube: ['youtube.com', 'youtu.be', 'music.youtube.com'],
@@ -65,37 +66,27 @@ async function bot() {
   };
 }
 
+// gronka keeps no per-request history, only failures (alerts) with the site's host, so a source
+// can be judged by its failures alone: it never reads as down, only degraded past a threshold.
 async function sources() {
   const since = `extract(epoch from now())*1000 - ${WINDOW_HOURS * 3600000}`;
   const rows = await sql(`
-    with c as (
-      select operation_id, metadata::jsonb->>'originalUrl' u from operation_logs
-      where step = 'created' and timestamp > ${since} and metadata::jsonb ? 'originalUrl'
-    ), f as (
-      select distinct on (operation_id) operation_id, metadata::jsonb->>'newStatus' s from operation_logs
-      where step = 'status_update' and timestamp > ${since} and metadata::jsonb->>'newStatus' in ('success', 'error')
-      order by operation_id, id desc
-    )
-    select lower(substring(u from '^https?://([^/:?#]+)')), count(*) filter (where s = 'success'), count(*) filter (where s = 'error')
-    from c join f using (operation_id) group by 1`);
-  const tally = Object.fromEntries(Object.keys(SOURCES).map(id => [id, { ok: 0, err: 0 }]));
+    select metadata::jsonb->>'source', count(*) from alerts
+    where title = 'command failed' and timestamp > ${since} and metadata::jsonb->>'source' is not null
+    group by 1`);
+  const failures = Object.fromEntries(Object.keys(SOURCES).map(id => [id, 0]));
   for (const line of rows ? rows.split('\n') : []) {
-    const [host, ok, err] = line.split('\t');
-    const id = sourceOf(host || '');
-    if (id) (tally[id].ok += Number(ok)), (tally[id].err += Number(err));
+    const [host, n] = line.split('\t');
+    const id = sourceOf((host || '').toLowerCase());
+    if (id) failures[id] += Number(n);
   }
-  return Object.entries(tally).map(([id, { ok, err }]) => {
-    const n = ok + err;
-    const rate = n ? ok / n : null;
-    const state = !n ? 'idle' : err >= 3 && !ok ? 'down' : n >= 3 && rate < 0.9 ? 'degraded' : 'ok';
-    return {
-      id,
-      group: 'sources',
-      label: LABELS[id] ?? id,
-      state,
-      detail: n ? `${Math.round(rate * 100)}% of ${n} in ${WINDOW_HOURS}h` : `no requests in ${WINDOW_HOURS}h`,
-    };
-  });
+  return Object.entries(failures).map(([id, err]) => ({
+    id,
+    group: 'sources',
+    label: LABELS[id] ?? id,
+    state: err >= FAILURES_DEGRADED ? 'degraded' : 'ok',
+    detail: err ? `${err} failure${err === 1 ? '' : 's'} in ${WINDOW_HOURS}h` : `no failures in ${WINDOW_HOURS}h`,
+  }));
 }
 
 async function sessions() {
