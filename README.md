@@ -6,7 +6,7 @@ stays up when the gronka box does not.
 - **The Worker** (`src/worker.js`) checks web.gronka.dev, api.gronka.dev and the cdn itself every
   5 minutes, keeps 90 days of daily uptime, and says so plainly when the box stops reporting.
 - **The box** runs `bin/status.js collect` every 2 minutes: bot health, media workers, session
-  health and each source's success rate over the last 3 hours. Only counts and states are sent.
+  health and each source's failed downloads over the last 3 hours. Only counts and states are sent.
 - **Incidents** are written with the same script and show up at once:
 
 ```

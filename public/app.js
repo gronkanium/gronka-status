@@ -9,7 +9,7 @@ const ORDER = ['bot', 'workers', 'web', 'api', 'cdn'];
 const GROUPS = [
   ['gronka', 'gronka'],
   ['sessions', 'sessions', 'the logins gronka downloads with, kept alive automatically'],
-  ['sources', 'sources', 'success rate of real requests'],
+  ['sources', 'sources', 'failed downloads in the last 3 hours'],
 ];
 const WORD = { ok: 'working', degraded: 'slow', down: 'failing', unknown: 'no data', idle: 'quiet' };
 // "degraded" means something different per component: a slow answer, a bot starting up, some
